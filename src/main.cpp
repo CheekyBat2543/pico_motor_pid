@@ -29,12 +29,12 @@ int main() {
     motor.enable();
     
     while(true) {
-        servo.setUs(1000);
-        sleep_ms(1000);
+        // servo.setUs(1000);
+        // sleep_ms(1000);
         servo.setUs(1500);
         sleep_ms(2000);
-        servo.setUs(2000);
-        sleep_ms(2000);
+        // servo.setUs(2000);
+        // sleep_ms(2000);
     }
     return 0;
 }
