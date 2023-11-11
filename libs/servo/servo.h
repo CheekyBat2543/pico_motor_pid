@@ -65,6 +65,13 @@ public:
     void setDegree(const float degree);
 
     /**
+     * @brief Set the Period of the PWM signal that the servo needs.
+     * 
+     * @param us 
+     */
+    void setPeriod(const uint us);
+
+    /**
      * @brief Deinitiliaze the servo pin used.
      * 
      */
@@ -75,8 +82,8 @@ public:
 private:
     const uint mServoPin{};
     const uint mSliceNum{};
-    float mPeriodUs { 0.02f };
-    uint wrap { 39062 };
+    uint mPeriodUs { 20000 };
+    uint mWrap { 39062 };
     uint mMinUs{ 600 };
     uint mMaxUs{ 2400 };
     int mMaxDegree { 90 };

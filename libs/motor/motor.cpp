@@ -12,14 +12,13 @@
 #include "hardware/clocks.h"
 #include "hardware/gpio.h"
 #include "hardware/pwm.h"
-#include <cassert>
-#include <cstdio>
+#include <stdio.h>
 
 #include "motor.h"
 
 Motor::Motor(const uint motorPin)
     : mMotorPin(motorPin), mSliceNum(pwm_gpio_to_slice_num(mMotorPin)) {
-  assert(motorPin >= 30 && "Motor Pin not valid!\n");
+  assert(motorPin <= 30 && "Motor Pin not valid!\n");
 }
 
 void Motor::setBoundsUs(uint min, uint max) {
@@ -40,9 +39,8 @@ void Motor::setup() {
 
   uint32_t clockSpeed = clock_get_hz(clk_sys);
 
-  const float clockDiv{
-      static_cast<float>(clockSpeed / 100000U)}; // For 1us clock period.
-  mWrap = clockSpeed / clockDiv / mMaxUs;
+  const float clockDiv{ static_cast<float>(clockSpeed / 1000000U) }; // For 1us clock period.
+  mWrap = (clockSpeed / clockDiv * static_cast<float>(mMaxUs)) / 1000000;
 
   pwm_config_set_clkdiv(&config, clockDiv);
   pwm_config_set_wrap(&config, mWrap);
@@ -64,7 +62,7 @@ void Motor::enable() {
 }
 
 void Motor::setUs(const uint micros) {
-  uint16_t chanLevel{static_cast<uint16_t>(micros)};
+  uint16_t chanLevel{static_cast<uint16_t>((micros * mWrap) / mMaxUs)};
   assert(chanLevel >= mMinUs && chanLevel <= mMaxUs &&
          "Channel Level is not within bounds\n");
   pwm_set_chan_level(mSliceNum, mMotorPin % 2, chanLevel);
@@ -78,13 +76,8 @@ void Motor::setDutyCycle(const float dutyCycle) {
   assert(dutyCycle >= 0.0f && dutyCycle <= 100.0f &&
          "Duty Cycle out of Range\n");
   float multiplier{static_cast<float>(mMaxUs - mMinUs) / 100.0f};
-  uint16_t chanLevel{static_cast<uint16_t>(dutyCycle * multiplier)};
-  pwm_set_chan_level(mSliceNum, mMotorPin % 2, chanLevel);
-
-  if (debugFlag) {
-    printf("Debug Messeage => Motor %u Set with chanLevel: %u\n", mMotorPin,
-           chanLevel);
-  }
+  Motor::setUs(static_cast<uint16_t>(dutyCycle * multiplier));
+  
 }
 
 void Motor::deInit() {

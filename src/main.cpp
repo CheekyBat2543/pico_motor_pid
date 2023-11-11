@@ -14,27 +14,31 @@
 #include "motor.h"
 #include <cstdio>
 
-constexpr uint servoPin { 10 };
+constexpr uint servoPin { 0 };
 constexpr uint motorPin { 5 };
 
 int main() {
     
+    stdio_init_all();
+
+    gpio_init(25);
+    gpio_set_dir(25, 1);
+    gpio_put(25, 1);
+
     Servo servo(servoPin);
     Motor motor(motorPin);
 
     servo.setup();
-    servo.enable();
-
     motor.setup();
-    motor.enable();
-    
+
     while(true) {
-        // servo.setUs(1000);
-        // sleep_ms(1000);
-        servo.setUs(1500);
+        servo.setUs(1000);
+        sleep_ms(1000);
+        servo.setUs(1000);
         sleep_ms(2000);
-        // servo.setUs(2000);
-        // sleep_ms(2000);
+        servo.setUs(2000);
+        sleep_ms(2000);
+        printf("Bruh!\n");
     }
     return 0;
 }

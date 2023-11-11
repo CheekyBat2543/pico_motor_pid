@@ -36,28 +36,23 @@ void Servo::setBoundsDegree(float min, float max) {
 
 void Servo::setup() {
 
-  gpio_init(mServoPin);
-  gpio_set_dir(mServoPin, GPIO_OUT);
   gpio_set_function(mServoPin, GPIO_FUNC_PWM);
-
-  const uint sliceNum{pwm_gpio_to_slice_num(mServoPin)};
 
   pwm_config config{pwm_get_default_config()};
 
   uint32_t clockSpeed = clock_get_hz(clk_sys);
 
-  const float clockDiv{ static_cast<float>(clockSpeed / 100000U) }; // For 1us clock period.
-  wrap = (clockSpeed / clockDiv) * mPeriodUs; // For 1us precision between the ranges 0-2400us.
-
+  const float clockDiv{ static_cast<float>(clockSpeed / 1000000U) }; // For 1us clock period.
+  mWrap = (clockSpeed / clockDiv) * (static_cast<float>(mPeriodUs) / 1000000.0f); // For 1us precision between the ranges 0-2400us.
   pwm_config_set_clkdiv(&config, clockDiv);
-  pwm_config_set_wrap(&config, wrap);
+  pwm_config_set_wrap(&config, mWrap);
 
-  pwm_init(sliceNum, &config, false);
+  pwm_init(mSliceNum, &config, true);
 
   if (debugFlag) {
     printf("Debug Messeage => Servo %u Init with ClockSpeed: %u, ClockDiv: %u "
            "and Wrap: %u\n",
-           mServoPin, clockSpeed, clockDiv, wrap);
+           mServoPin, clockSpeed, clockDiv, mWrap);
   }
 }
 
@@ -69,7 +64,7 @@ void Servo::enable() {
 }
 
 void Servo::setUs(const uint micros) {
-  uint16_t chanLevel{ static_cast<uint16_t>(micros)};
+  uint16_t chanLevel{ static_cast<uint16_t>(micros * mWrap / mPeriodUs)};
   assert(chanLevel >= mMinUs && chanLevel <= mMaxUs &&
          "Channel Level is not within bounds\n");
   pwm_set_chan_level(mSliceNum, mServoPin % 2, chanLevel);
@@ -82,15 +77,12 @@ void Servo::setUs(const uint micros) {
 void Servo::setDegree(const float degree) {
   float multiplier{static_cast<float>(mMaxUs - mMinUs) /
                    (mMaxDegree - mMinDegree)};
-  uint16_t chanLevel{static_cast<uint16_t>(degree * multiplier)};
-  assert(chanLevel >= mMinUs && chanLevel <= mMaxUs &&
-         "Channel Level is not within bounds\n");
-  printf("Debug Messeage => Servo %u Set with chanLevel: %u\n", mServoPin,
-         chanLevel);
-  if (debugFlag) {
-    printf("Debug Messeage => Servo %u Set with chanLevel: %u\n", mServoPin,
-           chanLevel);
-  }
+  Servo::setUs(static_cast<uint>(degree * multiplier));
+}
+
+void Servo::setPeriod(const uint us) {
+  mPeriodUs = us;
+  Servo::setup();
 }
 
 void Servo::deInit() {
