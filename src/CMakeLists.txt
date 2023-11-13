@@ -11,6 +11,5 @@ pico_enable_stdio_uart(pico_motor_pid 0)
 
 target_link_libraries(pico_motor_pid
     pico_stdlib
-    pico_servo
     pico_motor
 )  

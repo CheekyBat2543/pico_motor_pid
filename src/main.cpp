@@ -10,7 +10,6 @@
  */
 
 #include "pico/stdlib.h"
-#include "servo.h"
 #include "motor.h"
 #include <cstdio>
 
@@ -28,7 +27,7 @@ int main() {
     Servo servo(servoPin);
     Motor motor(motorPin);
 
-    servo.setup();
+    // servo.setup();
     motor.setup();
 
     while(true) {

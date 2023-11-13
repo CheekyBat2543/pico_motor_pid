@@ -1,18 +1,19 @@
 /**
  * @file motor.h
  * @author Alper Tunga Güven (alpertunga2003@gmail.com)
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2023-11-11
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #ifndef MOTOR_H
 #define MOTOR_H
 
-class Motor {
+class Motor
+{
 public:
     Motor(const uint motorPin);
 
@@ -26,21 +27,38 @@ public:
 
     void deInit();
 
+    void setPeriod(const uint us);
+
     void setDutyCycle(const float dutyCycle);
 
     ~Motor();
 
-private:
+protected:
     const uint mMotorPin{};
     const uint mSliceNum{};
-    uint16_t mWrap {};
+    uint16_t mWrap{};
     uint mMinUs{ 0 };
     uint mMaxUs{ 10000 };
-    #ifdef NDEBUG
-    static constexpr bool debugFlag { false };
-    #else
-    static constexpr bool debugFlag { true };
-    #endif
+    uint mPeriodUs{ 10000 };
+#ifdef NDEBUG
+    static constexpr bool debugFlag{false};
+#else
+    static constexpr bool debugFlag{true};
+#endif
+};
+
+class Servo : public Motor
+{
+public:
+    Servo(const uint servoPin);
+
+    Servo(const uint servoPin, const int minDegree, const int maxDegree);
+
+    void setDegree(const float degree);
+
+private:
+    int mMinDegree{-90};
+    int mMaxDegree{90};
 };
 
 #endif
