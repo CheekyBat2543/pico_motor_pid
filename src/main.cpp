@@ -9,12 +9,53 @@
  * 
  */
 
-#include "pico/stdlib.h"
-#include "motor.h"
 #include <cstdio>
+#include "pico/stdlib.h"
+#include "main.hpp"
+#include "motor.h"
 
 constexpr uint servoPin { 0 };
 constexpr uint motorPin { 5 };
+
+class Rover {
+public:
+
+    Rover(const MotorSet& motorSet, const ServoSet& servoSet) : motors(motorSet), servos(servoSet)
+    { 
+
+    }
+
+    void setup() {
+        motors.frontLeft.setup();
+        motors.frontRight.setup();
+        motors.backLeft.setup();
+        motors.backRight.setup();
+
+        servos.frontLeft.setup();
+        servos.frontRight.setup();
+        servos.backLeft.setup();
+        servos.backRight.setup();
+    }
+
+    void setDirection(int forward, int backward, int left, int right) {
+
+    }
+
+    void setSpeed(float speed) {
+
+    }
+
+    void pidEnable(bool enable) {
+
+    }
+
+private:
+    MotorSet motors{ {0}, {0}, {0}, {0}};
+    ServoSet servos{ {0}, {0}, {0}, {0}};
+    // EncoderSet encoders .....
+    bool pidFlag { false };
+};
+
 
 int main() {
     
@@ -24,20 +65,13 @@ int main() {
     gpio_set_dir(25, 1);
     gpio_put(25, 1);
 
-    Servo servo(servoPin);
-    Motor motor(motorPin);
+    Rover rover(MotorSet(1, 2, 3, 4), ServoSet(5, 6, 7, 8));
 
-    // servo.setup();
-    motor.setup();
+    rover.setup();
 
     while(true) {
-        servo.setUs(1000);
-        sleep_ms(1000);
-        servo.setUs(1500);
-        sleep_ms(2000);
-        servo.setUs(2000);
-        sleep_ms(2000);
-        printf("Bruh!\n");
+
     }
+
     return 0;
 }
