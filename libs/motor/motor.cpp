@@ -30,7 +30,7 @@ void Motor::setup()
     gpio_set_function(mMotorPin, GPIO_FUNC_PWM);
 
     pwm_config config{pwm_get_default_config()};
-
+        
     uint32_t clockSpeed = clock_get_hz(clk_sys);
 
     const float clockDiv{
@@ -77,7 +77,8 @@ void Motor::setUs(const uint micros)
 
 void Motor::setDutyCycle(const float dutyCycle)
 {
-    float multiplier{static_cast<float>(mPeriodUs) / 100.0f};
+    float multiplier{static_cast<float>(mMaxUs) / 100.0f};
+    printf("Duty Cycle = %.2f , Multiplier = %.2f\n", dutyCycle, multiplier);
     Motor::setUs(static_cast<uint16_t>(dutyCycle * multiplier));
 }
 
@@ -114,5 +115,5 @@ void Servo::setDegree(const float degree)
 {
     float multiplier{static_cast<float>(mMaxUs - mMinUs) /
                      (mMaxDegree - mMinDegree)};
-    Servo::setUs(static_cast<uint>(degree * multiplier + mMinUs));
+    Motor::setUs(static_cast<uint>(degree * multiplier + ((mMaxUs - mMinUs) / 2)));
 }

@@ -38,14 +38,17 @@ protected:
     const uint mSliceNum{};
     uint16_t mWrap{};
     uint mMinUs{ 0 };
-    uint mMaxUs{ 10000 };
-    uint mPeriodUs{ 10000 };
+    uint mMaxUs{ kMotorShieldHz };
+    uint mPeriodUs{ kMotorShieldHz };
+    static constexpr uint kMotorShieldHz { 16000 };
 #ifdef NDEBUG
     static constexpr bool debugFlag{false};
 #else
     static constexpr bool debugFlag{true};
 #endif
 };
+
+
 
 class Servo : public Motor
 {
