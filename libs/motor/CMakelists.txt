@@ -12,5 +12,5 @@ target_link_libraries(pico_motor
 
 target_include_directories(pico_motor
     PUBLIC 
-        "${CMAKE_CURRENT_SOURCE_DIR}"   
+        ${CMAKE_CURRENT_SOURCE_DIR}  
 )   

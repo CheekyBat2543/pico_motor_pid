@@ -16,18 +16,20 @@
 
 #include "motor.h"
 
-Motor::Motor(const uint motorPin)
-    : mMotorPin(motorPin), mSliceNum(pwm_gpio_to_slice_num(mMotorPin)) {}
 
-void Motor::setBoundsUs(uint min, uint max)
+
+PwmController::PwmController(const uint pwmPin)
+    : mPwmPin(pwmPin), mSliceNum(pwm_gpio_to_slice_num(mPwmPin)) {}
+
+void PwmController::setBoundsUs(uint min, uint max)
 {
     mMinUs = min;
     mMaxUs = max;
 }
 
-void Motor::setup()
+void PwmController::setup()
 {
-    gpio_set_function(mMotorPin, GPIO_FUNC_PWM);
+    gpio_set_function(mPwmPin, GPIO_FUNC_PWM);
 
     pwm_config config{pwm_get_default_config()};
         
@@ -46,74 +48,85 @@ void Motor::setup()
     {
         printf("Debug Messeage => Motor %u Init with ClockSpeed: %u, ClockDiv: %.2f "
                "and mWrap: %u\n",
-               mMotorPin, clockSpeed, clockDiv, mWrap);
+               mPwmPin, clockSpeed, clockDiv, mWrap);
     }
 }
 
-void Motor::enable()
+void PwmController::enable()
 {
     pwm_set_enabled(mSliceNum, true);
     if (debugFlag)
     {
-        printf("Debug Messeage => Motor %u Enabled\n", mMotorPin);
+        printf("Debug Messeage => Motor %u Enabled\n", mPwmPin);
     }
 }
 
-void Motor::setUs(const uint micros)
+void PwmController::setUs(const uint micros)
 {
+    /* Calculate the pwm "on" period. */
     uint16_t chanLevel{static_cast<uint16_t>((micros * mWrap) / mPeriodUs)};
+    /* Check if the needed channel level is within the accepted range. */
+    chanLevel = chanLevel > mMaxUs ? mMaxUs : chanLevel;
+    chanLevel = chanLevel < mMinUs ? mMinUs : chanLevel;
+    pwm_set_chan_level(mSliceNum, mPwmPin % 2, chanLevel);
     if (debugFlag)
     {
-        chanLevel = chanLevel > mMaxUs ? mMaxUs : chanLevel;
-        chanLevel = chanLevel < mMinUs ? mMinUs : chanLevel;
-    }
-    pwm_set_chan_level(mSliceNum, mMotorPin % 2, chanLevel);
-    if (debugFlag)
-    {
-        printf("Debug Messeage => Motor %u Set with chanLevel: %u\n", mMotorPin,
+        printf("Debug Messeage => Motor %u Set with chanLevel: %u\n", mPwmPin,
                chanLevel);
     }
 }
 
-void Motor::setDutyCycle(const float dutyCycle)
+void PwmController::setDutyCycle(const float dutyCycle)
 {
     float multiplier{static_cast<float>(mMaxUs) / 100.0f};
     printf("Duty Cycle = %.2f , Multiplier = %.2f\n", dutyCycle, multiplier);
-    Motor::setUs(static_cast<uint16_t>(dutyCycle * multiplier));
+    PwmController::setUs(static_cast<uint16_t>(dutyCycle * multiplier));
 }
 
-void Motor::setPeriod(const uint us)
+void PwmController::setPeriod(const uint us)
 {
     mPeriodUs = us;
-    Motor::setup();
+    PwmController::setup();
 }
 
-void Motor::deInit()
+void PwmController::deInit()
 {
     pwm_set_enabled(mSliceNum, false);
-    gpio_deinit(mMotorPin);
+    gpio_deinit(mPwmPin);
 }
 
-Motor::~Motor() { deInit(); }
+PwmController::~PwmController() { deInit(); }
 
-Servo::Servo(const uint servoPin) : Motor(servoPin)
+Motor::Motor(const uint motorPin) : PwmController(motorPin) {
+    mMinUs = 0;
+    mMaxUs = kMotorShieldHz * kMaxDutyRate;
+    mPeriodUs = kMotorShieldHz;
+}
+
+Motor::Motor(const uint motorPin, const uint pwmPeriod) : PwmController(motorPin) {
+    mMinUs = 0;
+    mMaxUs = pwmPeriod * kMaxDutyRate;
+    mPeriodUs = pwmPeriod;
+}
+
+Servo::Servo(const uint servoPin) : PwmController(servoPin)
 {
     mMinUs = 600U;
     mMaxUs = 2400U;
-    mPeriodUs = 20000U;
+    mPeriodUs = kServoPeriod;
 }
 
 Servo::Servo(const uint servoPin, const int minDegree, const int maxDegree)
-    : Motor(servoPin), mMinDegree(minDegree), mMaxDegree(maxDegree)
+    : PwmController(servoPin), mMinDegree(minDegree), mMaxDegree(maxDegree)
 {
     mMinUs = 600U;
     mMaxUs = 2400U;
-    mPeriodUs = 20000U;
+    mPeriodUs = kServoPeriod;
 }
 
 void Servo::setDegree(const float degree)
 {
     float multiplier{static_cast<float>(mMaxUs - mMinUs) /
                      (mMaxDegree - mMinDegree)};
-    Motor::setUs(static_cast<uint>(degree * multiplier + ((mMaxUs - mMinUs) / 2)));
+    PwmController::setUs(static_cast<uint>(degree * multiplier + ((mMaxUs - mMinUs) / 2)));
 }

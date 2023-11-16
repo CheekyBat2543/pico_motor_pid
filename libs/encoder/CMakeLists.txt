@@ -1,15 +1,14 @@
 add_library(pico_encoder
-    STATIC
-        encoder.cpp
+    INTERFACE
+        encoder.h
 )
 
 target_link_libraries(pico_encoder
-    PRIVATE
-        hardware_gpio
-        hardware_clocks
+    INTERFACE
+        pico_stdlib
 )   
 
 target_include_directories(pico_encoder
-    PUBLIC 
+    INTERFACE 
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
