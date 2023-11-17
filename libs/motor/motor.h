@@ -20,15 +20,17 @@ public:
 
     PwmController(const uint pwmPin);
 
-    void setBoundsUs(uint min, uint max);
+    void setBoundsNs(const uint32_t min, const uint32_t max);
 
     void setup();
 
     void enable();
 
-    void setPeriod(const uint us);
+    void setPeriodNs(const uint32_t ns);
 
-    void setUs(const uint micros);
+    void setFrequency(const uint32_t hz);
+
+    void setNs(const uint32_t nanos);
 
     void setDutyCycle(const float dutyCycle);
 
@@ -39,14 +41,14 @@ protected:
     const uint mPwmPin{};
     const uint mSliceNum{};
     uint16_t mWrap{};
-    uint mMinUs{ 0 };
-    uint mMaxUs{ 16000 };
-    uint mPeriodUs{ mMaxUs };
+    uint32_t mMinNs{ 0 };
+    uint32_t mMaxNs{ 16000000 };
+    uint32_t mPeriodNs{ mMaxNs };
+    uint32_t mFrequency{ static_cast<uint32_t>(1000000000.0f / mPeriodNs) };
 #ifdef NDEBUG
     static constexpr bool debugFlag{false};
 #else
     static constexpr bool debugFlag{true};
-
 #endif
 };
 
@@ -59,10 +61,11 @@ class Motor : public PwmController
 public:
     Motor(const uint motorPin);
 
-    Motor(const uint motorPin, const uint pwmPeriod);
+    Motor(const uint motorPin, const uint32_t pwmPeriod);
 
 private:
-    static constexpr uint kMotorShieldHz { 16000 };
+    static constexpr uint32_t kMotorShieldHz { 16000 };
+    static constexpr uint32_t kMotorShieldPeriodNs { 1000000000 / kMotorShieldHz };
     static constexpr float kMaxDutyRate{ 98.0f };
 };
 
@@ -80,7 +83,7 @@ public:
 private:
     int mMinDegree{-90};
     int mMaxDegree{90};
-    static constexpr uint kServoPeriod{ 20000 };
+    static constexpr uint32_t kServoPeriodNs{ 20000000 };
 };
 
 #endif

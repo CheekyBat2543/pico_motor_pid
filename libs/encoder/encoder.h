@@ -15,13 +15,14 @@ namespace Encoder {
 
     static repeating_timer timer{};
 
-    constexpr uint frontLeftPin { 0 };
-    constexpr uint frontRightPin { 1 };
-    constexpr uint backLeftPin { 3 };
-    constexpr uint backRightPin { 2 };
+    constexpr uint frontLeftPin { 16 };
+    constexpr uint frontRightPin { 17 };
+    constexpr uint backLeftPin { 18 };
+    constexpr uint backRightPin { 19 };
     constexpr uint pins[kMaxSize] { frontLeftPin, frontRightPin, backLeftPin, backRightPin };
 
-    constexpr uint kPulsesPerRotation { 64 };
+    constexpr uint kPulsesPerRotation { 1 };
+    constexpr uint kGearRatio { 1 };
     constexpr uint kPulseReadPeriodUs { 100000 };
 
     uint64_t counter[kMaxSize] {};
@@ -30,17 +31,17 @@ namespace Encoder {
 
     void gpioCallback(uint gpio, uint32_t flags) {
         switch(gpio) {
-            case pins[frontLeftPin]:
-                counter[frontLeftPin]++;
+            case pins[frontLeft]:
+                counter[frontLeft]++;
                 return;
-            case pins[frontRightPin]:
-                counter[frontRightPin]++;
+            case pins[frontRight]:
+                counter[frontRight]++;
                 return;
-            case pins[backLeftPin]:
-                counter[backLeftPin]++;
+            case pins[backLeft]:
+                counter[backLeft]++;
                 return;
-            case pins[backRightPin]:
-                counter[backRightPin]++;
+            case pins[backRight]:
+                counter[backRight]++;
                 return;
             default:
                 return;
@@ -48,7 +49,7 @@ namespace Encoder {
     }
 
     bool timerCallback(repeating_timer_t *rt) {
-        constexpr float kMultiplier { (1000000.0f / (kPulseReadPeriodUs * kPulsesPerRotation) * 60) };
+        constexpr float kMultiplier { ((1000000.0f / (kPulseReadPeriodUs * kPulsesPerRotation) * 60) / kGearRatio) };
         for(int i = 0; i < kMaxSize; i++) {
             const uint32_t counterDifference { static_cast<uint32_t>(counter[i] - prevCounter[i]) };
             rpm[i] = static_cast<uint32_t>(counterDifference * kMultiplier);

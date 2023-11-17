@@ -12,6 +12,7 @@ pico_enable_stdio_uart(pico_rover 0)
 target_link_libraries(pico_rover
     pico_stdlib
     pico_motor
+    pico_encoder
 )  
 
 target_include_directories(pico_rover

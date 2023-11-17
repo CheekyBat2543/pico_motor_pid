@@ -13,6 +13,7 @@
 #include "pico/stdlib.h"
 #include "main.hpp"
 #include "motor.h"
+#include "encoder.h"
 
 struct PidConstants {
     const float Kp{};
@@ -86,9 +87,24 @@ public:
 private:
     MotorSet motors{ {0}, {0}, {0}, {0}};
     ServoSet servos{ {0}, {0}, {0}, {0}};
-    // EncoderSet encoders .....
     bool pidFlag { false };
+    uint32_t currentRpm[Encoder::kMaxSize] {};
+    uint32_t prevRpm[Encoder::kMaxSize] {};
+    static constexpr float kWheelRadiusCm { 5.0 };
+    static constexpr float kPi { 3.14159265359 };
     const PidConstants kMotorPid{ 0.0f, 0.0f , 0.0f, 0.0f };
+
+    float rpmToMs(uint32_t rpm) {
+        constexpr float multiplier { (2 * (kWheelRadiusCm / 100.f)* kPi) / 60.0f };
+        const float ms { static_cast<float>(rpm) * multiplier };  
+        return ms; 
+    }
+    uint32_t msToRpm(float ms) {        
+        constexpr float multiplier { 60.0f / (2 * (kWheelRadiusCm / 100.f)* kPi) };
+        const uint32_t rpm { static_cast<uint32_t>(ms * multiplier) };  
+        return rpm; 
+    }
+
 };
 
 
