@@ -54,6 +54,8 @@ public:
      * 
      */
     void setup() {
+        Encoder::setup();
+
         motors.frontLeft.setup();
         motors.frontRight.setup();
         motors.backLeft.setup();
