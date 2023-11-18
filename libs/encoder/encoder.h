@@ -27,7 +27,7 @@ namespace Encoder {
 
     uint64_t counter[kMaxSize] {};
     uint64_t prevCounter[kMaxSize] {};
-    uint32_t rpm[kMaxSize] {};
+    int32_t rpm[kMaxSize] {};
 
     void gpioCallback(uint gpio, uint32_t flags) {
         switch(gpio) {
@@ -52,7 +52,7 @@ namespace Encoder {
         constexpr float kMultiplier { ((1000000.0f / (kPulseReadPeriodUs * kPulsesPerRotation) * 60) / kGearRatio) };
         for(int i = 0; i < kMaxSize; i++) {
             const uint32_t counterDifference { static_cast<uint32_t>(counter[i] - prevCounter[i]) };
-            rpm[i] = static_cast<uint32_t>(counterDifference * kMultiplier);
+            rpm[i] = static_cast<int32_t>(counterDifference * kMultiplier);
             prevCounter[i] = counter[i];
         }
         return true;
@@ -70,7 +70,7 @@ namespace Encoder {
         return true;        
     }
 
-    void getRpm(uint32_t * rpmArray) {
+    void getRpm(int32_t * rpmArray) {
         for(int i = 0; i < kMaxSize; i++) {
             rpmArray[i] = rpm[i];
         }

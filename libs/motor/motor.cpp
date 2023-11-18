@@ -100,6 +100,11 @@ void PwmController::setPeriodNs(const uint32_t ns)
     PwmController::setup();
 }
 
+uint16_t PwmController::getMaxNs() {
+    return mMaxNs;
+}
+
+
 void PwmController::deInit()
 {
     pwm_set_enabled(mSliceNum, false);

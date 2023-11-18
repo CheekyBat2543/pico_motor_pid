@@ -15,9 +15,9 @@ int main() {
     Encoder::setup();
 
     while(true) {
-        uint32_t rpmValues[Encoder::kMaxSize] {};
+        int32_t rpmValues[Encoder::kMaxSize] {};
         Encoder::getRpm(rpmValues);
-        printf("Rpm Values: 1 = %u, 2 = %u, 3 = %u, 4 = %u", rpmValues[0], rpmValues[1], rpmValues[2], rpmValues[3]);
+        printf("Rpm Values: 1 = %d, 2 = %d, 3 = %d, 4 = %d", rpmValues[0], rpmValues[1], rpmValues[2], rpmValues[3]);
         sleep_ms(100);
     }
 

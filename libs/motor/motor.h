@@ -32,6 +32,8 @@ public:
 
     void setNs(const uint32_t nanos);
 
+    uint16_t getMaxNs();
+
     void setDutyCycle(const float dutyCycle);
 
     void deInit();
@@ -40,9 +42,9 @@ public:
 protected:
     const uint mPwmPin{};
     const uint mSliceNum{};
-    uint16_t mWrap{};
     uint32_t mMinNs{ 0 };
     uint32_t mMaxNs{ 16000000 };
+    uint16_t mWrap{};
     uint32_t mPeriodNs{ mMaxNs };
     uint32_t mFrequency{ static_cast<uint32_t>(1000000000.0f / mPeriodNs) };
 #ifdef NDEBUG
